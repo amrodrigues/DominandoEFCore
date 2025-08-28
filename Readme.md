@@ -57,6 +57,15 @@ O projeto principal está no arquivo `Program.cs`, onde cada método estático r
   - Utilização de propriedades de sombra para armazenar metadados.
   - Uso de **Backing Fields** para encapsular a lógica de acesso a dados.
 
+### Interceptadores
+
+A seção de interceptadores demonstra como você pode estender o comportamento padrão do Entity Framework Core sem alterar o código principal da sua aplicação.
+
+* **Interceptação de Comandos**: Exemplo de um `DbCommandInterceptor` que injeta a cláusula `WITH (NOLOCK)` em todas as consultas `SELECT`, uma técnica comum para leitura de dados sem bloqueio.
+* **Interceptação de `SaveChanges`**: Mostra como interceptar a operação de `SaveChanges` para adicionar lógica de negócio, como preencher automaticamente campos de auditoria antes que a entidade seja persistida no banco de dados.
+
+O uso de interceptadores é uma forma poderosa de aplicar lógica global e transversal à sua aplicação de acesso a dados.
+
 ---
 
 ## Licença
