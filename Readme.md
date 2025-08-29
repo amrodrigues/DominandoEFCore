@@ -66,6 +66,15 @@ A seção de interceptadores demonstra como você pode estender o comportamento 
 
 O uso de interceptadores é uma forma poderosa de aplicar lógica global e transversal à sua aplicação de acesso a dados.
 
+### Transações e Savepoints
+
+O método `ComportamentoPadrao()` exemplifica o uso de transações explícitas no **Entity Framework Core** para garantir a consistência de múltiplas operações no banco de dados. Ele demonstra as seguintes técnicas:
+
+* **Controle de Transações**: Utiliza `db.Database.BeginTransaction()` para iniciar e `transacao.Commit()` para finalizar a transação, garantindo que todas as operações sejam bem-sucedidas ou falhem em conjunto.
+* **Savepoints**: O código usa `transacao.CreateSavepoint()` para criar um ponto de salvamento. Isso permite reverter apenas uma parte da transação com `transacao.RollbackToSavepoint()`, o que é útil para desfazer operações específicas sem anular todas as alterações anteriores na mesma transação.
+* **Manipulação de Erros**: O bloco `try-catch` é usado para lidar com exceções de atualização do banco de dados (`DbUpdateException`). Em caso de falha, a transação é revertida para o `Savepoint`, garantindo que apenas as últimas alterações problemáticas sejam desfeitas, enquanto as alterações bem-sucedidas são mantidas.
+
+Esta funcionalidade é essencial para cenários onde a integridade dos dados é crítica, permitindo um controle granular sobre as operações de persistência.
 ---
 
 ## Licença

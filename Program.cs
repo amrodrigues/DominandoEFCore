@@ -18,95 +18,164 @@ namespace DominandoEFCore
         {
             //  ApagarCriarBancoDeDados();
             //TesteInteceptacao();
-            TesteInteceptacaoSaveChanges();
+            //TesteInteceptacaoSaveChanges();
+            ComportamentoPadrao();
         }
 
-        static void TesteInteceptacaoSaveChanges()
+        static void ComportamentoPadrao()
         {
+            CadastrarLivro();
+
             using (var db = new DominandoEFCore.Data.ApplicationContext())
             {
-                //var funcao = new Funcao
-                //{
-                //    Data1 = DateTime.Now,
-                //    Data2 = "2021-01-01",
-                //    Descricao1 = "Teste Interceptador",
-                //    Descricao2 = "Teste Interceptador"
-                //};
-
-                //db.Funcoes.Add(funcao);
-
-                db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
-
-                db.Funcoes.Add(new Funcao
+                var transacao = db.Database.BeginTransaction();
+                try
                 {
-                        Data1 = DateTime.Now,
-                        Data2 = "2021-01-01",
-                        Descricao2 = "Teste Interceptador",
-                    Descricao1 = "Teste Interceptador SaveChanges"
-                });
-                db.SaveChanges();
-            }
-        }
+                    //var livro = db.Livros.AsNoTracking().FirstOrDefault();
+                    var livro = db.Livros.FirstOrDefault(p => p.Id == 1);
+                    livro.Autor = "Ericka";
+                    db.SaveChanges();
 
-        static void TesteInteceptacao()
-        {
-            using (var db = new DominandoEFCore.Data.ApplicationContext())
-            {
+                   
 
-                var consulta = db
-                    .Funcoes
-                    .TagWith("Use NOLOCK")
-                    .AsNoTracking()
-                    .OrderBy(f => f.Id)
-                    .FirstOrDefault();
+                    db.Livros.Add(
+                      new Livro
+                      {
+                          Titulo = "ASP.NET Core Enterprise Applications",
+                          Autor = "Anna Maria"
+                         
+                      });
+                    db.SaveChanges();
+                    transacao.CreateSavepoint("desfazer_apenas_insercao");
+                    db.Livros.Add(
+                        new Livro
+                        {
+                            Titulo = "Dominando ao EF Core",
+                            //Autor = "Anna Maria Rodrigues"
+                            Autor = "Anna Maria Rodrigues".PadLeft(16, '*')
+                        });
+                    db.SaveChanges();
 
-                if (consulta != null)
-                {
-                    Console.WriteLine($"Consulta:{consulta.Descricao1}");
+                    transacao.Commit();
                 }
-                else
+                catch (DbUpdateException e)
                 {
-                    Console.WriteLine("Nenhum registro encontrado.");
+                    //transacao.Rollback();
+                    transacao.RollbackToSavepoint("desfazer_apenas_insercao");
+                    if (e.Entries.Count(p=>p.State == EntityState.Added)== e.Entries.Count)
+                    {
+                        transacao.Commit();     
+                    }
+
                 }
             }
-
-        }
-        static void ApagarCriarBancoDeDados()
+            static void CadastrarLivro()
             {
-               
-                using var db = new DominandoEFCore.Data.ApplicationContext();
-                db.Database.EnsureDeleted();
-                db.Database.EnsureCreated();
+                using (var db = new DominandoEFCore.Data.ApplicationContext())
+                {
+                    db.Database.EnsureDeleted();
+                    db.Database.EnsureCreated();
 
-                db.Funcoes.AddRange(
-                new Funcao
-                {
-                    Data1 = DateTime.Now.AddDays(2),
-                    Data2 = "2021-01-01",
-                    Descricao1 = "Bala 1 ",
-                    Descricao2 = "Bala 2 "
-                },
-                new Funcao
-                {
-                    Data1 = DateTime.Now.AddDays(1),
-                    Data2 = "XX21-01-01",
-                    Descricao1 = "Bola 2",
-                    Descricao2 = "Bola 2"
-                },
-                new Funcao
-                {
-                    Data1 = DateTime.Now.AddDays(1),
-                    Data2 = "XX21-01-01",
-                    Descricao1 = "Tela",
-                    Descricao2 = "Tela"
-                });
+                    db.Livros.Add(
+                        new Livro
+                        {
+                            Titulo = "Introdução ao Entity Framework Core",
+                            Autor = "Anna Maria"
+                        });
 
-                db.SaveChanges();
+                    db.SaveChanges();
+                }
             }
-           
+        }
     }
 }
+
+
+        //static void TesteInteceptacaoSaveChanges()
+        //{
+        //    using (var db = new DominandoEFCore.Data.ApplicationContext())
+        //    {
+        //        //var funcao = new Funcao
+        //        //{
+        //        //    Data1 = DateTime.Now,
+        //        //    Data2 = "2021-01-01",
+        //        //    Descricao1 = "Teste Interceptador",
+        //        //    Descricao2 = "Teste Interceptador"
+        //        //};
+
+        //        //db.Funcoes.Add(funcao);
+
+        //        db.Database.EnsureDeleted();
+        //        db.Database.EnsureCreated();
+
+        //        db.Funcoes.Add(new Funcao
+        //        {
+        //                Data1 = DateTime.Now,
+        //                Data2 = "2021-01-01",
+        //                Descricao2 = "Teste Interceptador",
+        //            Descricao1 = "Teste Interceptador SaveChanges"
+        //        });
+        //        db.SaveChanges();
+        //    }
+        //}
+
+        //static void TesteInteceptacao()
+        //{
+        //    using (var db = new DominandoEFCore.Data.ApplicationContext())
+        //    {
+
+        //        var consulta = db
+        //            .Funcoes
+        //            .TagWith("Use NOLOCK")
+        //            .AsNoTracking()
+        //            .OrderBy(f => f.Id)
+        //            .FirstOrDefault();
+
+        //        if (consulta != null)
+        //        {
+        //            Console.WriteLine($"Consulta:{consulta.Descricao1}");
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("Nenhum registro encontrado.");
+        //        }
+        //    }
+
+        //}
+        //static void ApagarCriarBancoDeDados()
+        //    {
+
+        //        using var db = new DominandoEFCore.Data.ApplicationContext();
+        //        db.Database.EnsureDeleted();
+        //        db.Database.EnsureCreated();
+
+        //        db.Funcoes.AddRange(
+        //        new Funcao
+        //        {
+        //            Data1 = DateTime.Now.AddDays(2),
+        //            Data2 = "2021-01-01",
+        //            Descricao1 = "Bala 1 ",
+        //            Descricao2 = "Bala 2 "
+        //        },
+        //        new Funcao
+        //        {
+        //            Data1 = DateTime.Now.AddDays(1),
+        //            Data2 = "XX21-01-01",
+        //            Descricao1 = "Bola 2",
+        //            Descricao2 = "Bola 2"
+        //        },
+        //        new Funcao
+        //        {
+        //            Data1 = DateTime.Now.AddDays(1),
+        //            Data2 = "XX21-01-01",
+        //            Descricao1 = "Tela",
+        //            Descricao2 = "Tela"
+        //        });
+
+        //        db.SaveChanges();
+        //    }
+
+
         //class Program
         //{
         //    static void Main(string[] args)
