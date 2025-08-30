@@ -75,6 +75,15 @@ O método `ComportamentoPadrao()` exemplifica o uso de transações explícitas 
 * **Manipulação de Erros**: O bloco `try-catch` é usado para lidar com exceções de atualização do banco de dados (`DbUpdateException`). Em caso de falha, a transação é revertida para o `Savepoint`, garantindo que apenas as últimas alterações problemáticas sejam desfeitas, enquanto as alterações bem-sucedidas são mantidas.
 
 Esta funcionalidade é essencial para cenários onde a integridade dos dados é crítica, permitindo um controle granular sobre as operações de persistência.
+
+---
+### Funções Definidas pelo Usuário e Mapeamento de Funções Nativas
+
+Esta seção demonstra como o **Entity Framework Core** pode interagir com funções criadas diretamente no banco de dados (funções definidas pelo usuário) e também como mapear funções nativas do SQL para C#.
+
+* **`FuncaoDefinidaPeloUsuario()`**: O exemplo mostra a criação de uma função SQL com `db.Database.ExecuteSqlRaw()`. Em seguida, essa função é mapeada para um método estático em C# (`Funcoes.MinhasFuncoes.LetrasMaiusculas`), permitindo que ela seja chamada diretamente em consultas LINQ. Isso é ideal para encapsular lógica de negócio complexa no banco de dados e executá-la de forma otimizada.
+* **Mapeamento de Funções Nativas**: O método `DateDIFF()` e `FuncaoLEFT()` demonstram o mapeamento de funções nativas do SQL Server para C#. Isso permite que funções como `DATEDIFF` e `LEFT` sejam utilizadas em consultas LINQ, que o EF Core traduzirá corretamente para o SQL equivalente, garantindo que a lógica seja executada de forma eficiente no lado do servidor.
+
 ---
 
 ## Licença

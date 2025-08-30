@@ -19,9 +19,69 @@ namespace DominandoEFCore
             //  ApagarCriarBancoDeDados();
             //TesteInteceptacao();
             //TesteInteceptacaoSaveChanges();
-            ComportamentoPadrao();
+            // ComportamentoPadrao();
+            FuncaoDefinidaPeloUsuario();
+            DateDIFF();
         }
 
+        static void DateDIFF()
+        {
+            CadastrarLivro();
+
+            using var db = new  DominandoEFCore.Data.ApplicationContext();
+
+            /*var resultado = db
+                .Livros
+                .Select(p=>  EF.Functions.DateDiffDay(p.CadastradoEm, DateTime.Now));
+                */
+
+            var resultado = db
+                .Livros
+                .Select(p => DominandoEFCore.Funcoes.MinhasFuncoes.DateDiff("DAY", p.CadastradoEm, DateTime.Now));
+
+            foreach (var diff in resultado)
+            {
+                Console.WriteLine("Dias desde o cadastro do livro:");
+                Console.WriteLine(diff);
+                Console.ReadKey();
+            }
+        }
+
+        static void FuncaoDefinidaPeloUsuario()
+        {
+            CadastrarLivro();
+
+            using var db = new DominandoEFCore.Data.ApplicationContext();
+
+            db.Database.ExecuteSqlRaw(@"
+                CREATE FUNCTION ConverterParaLetrasMaiusculas(@dados VARCHAR(100))
+                RETURNS VARCHAR(100)
+                BEGIN
+                    RETURN UPPER(@dados)
+                END");
+
+
+            var resultado = db.Livros.Select(p => DominandoEFCore.Funcoes.MinhasFuncoes.LetrasMaiusculas(p.Titulo));
+            foreach (var parteTitulo in resultado)
+            {
+                Console.WriteLine("Titulo em maiusculas:");
+                Console.WriteLine(parteTitulo);
+                Console.ReadKey();
+            }
+        }
+
+        static void FuncaoLEFT()
+        {
+            CadastrarLivro();
+
+            using var db = new DominandoEFCore.Data.ApplicationContext();
+
+            var resultado = db.Livros.Select(p => DominandoEFCore.Funcoes.MinhasFuncoes.Left(p.Titulo, 10));
+            foreach (var parteTitulo in resultado)
+            {
+                Console.WriteLine("Parte titulo:" + parteTitulo);
+            }
+        }
         static void ComportamentoPadrao()
         {
             CadastrarLivro();
@@ -69,22 +129,24 @@ namespace DominandoEFCore
 
                 }
             }
-            static void CadastrarLivro()
+
+        
+        }
+        static void CadastrarLivro()
+        {
+            using (var db = new DominandoEFCore.Data.ApplicationContext())
             {
-                using (var db = new DominandoEFCore.Data.ApplicationContext())
-                {
-                    db.Database.EnsureDeleted();
-                    db.Database.EnsureCreated();
+                db.Database.EnsureDeleted();
+                db.Database.EnsureCreated();
 
-                    db.Livros.Add(
-                        new Livro
-                        {
-                            Titulo = "Introdução ao Entity Framework Core",
-                            Autor = "Anna Maria"
-                        });
+                db.Livros.Add(
+                    new Livro
+                    {
+                        Titulo = "Introdução ao Entity Framework Core",
+                        Autor = "Anna Maria"
+                    });
 
-                    db.SaveChanges();
-                }
+                db.SaveChanges();
             }
         }
     }
